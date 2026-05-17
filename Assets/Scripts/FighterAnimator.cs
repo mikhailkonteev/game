@@ -12,6 +12,7 @@ public class FighterAnimator : MonoBehaviour
     public Sprite[] jumpFrames;
     public Sprite[] fallFrames;
     public Sprite[] attackFrames;
+    public Sprite[] heavyAttackFrames;
 
     [Header("Timing")]
     public float idleFrameRate = 8f;
@@ -49,6 +50,9 @@ public class FighterAnimator : MonoBehaviour
     {
         Vector2 velocity = rb.linearVelocity;
 
+        if (combat != null && combat.IsHeavyAttacking && HasFrames(heavyAttackFrames))
+            return heavyAttackFrames;
+
         if (combat != null && combat.IsAttacking && HasFrames(attackFrames))
             return attackFrames;
 
@@ -71,7 +75,7 @@ public class FighterAnimator : MonoBehaviour
 
     float GetFrameRate(Sprite[] frames)
     {
-        if (frames == attackFrames)
+        if (frames == attackFrames || frames == heavyAttackFrames)
             return attackFrameRate;
 
         if (frames == runFrames)

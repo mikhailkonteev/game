@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.IsGameOver)
+        if (GameManager.IsInputBlocked)
         {
             rb.linearVelocity = Vector2.zero;
             return;
