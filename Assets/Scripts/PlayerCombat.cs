@@ -6,15 +6,21 @@ public class PlayerCombat : MonoBehaviour
     public Transform attackPoint;
     public float attackRange = 1f;
     public int attackDamage = 10;
+    public float attackAnimationDuration = 0.35f;
     public LayerMask enemyLayer;
+
+    private float attackAnimationEndTime;
+
+    public bool IsAttacking => Time.time < attackAnimationEndTime;
 
     void Update()
     {
         if (GameManager.IsGameOver)
             return;
 
-        if (Input.GetKeyDown(attackKey))
+        if (Input.GetKeyDown(attackKey) && !IsAttacking)
         {
+            attackAnimationEndTime = Time.time + attackAnimationDuration;
             Attack();
         }
     }
