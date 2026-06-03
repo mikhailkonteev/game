@@ -5,6 +5,7 @@ public class FighterAnimator : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     public Rigidbody2D rb;
     public PlayerCombat combat;
+    public Health health;
 
     [Header("Frames")]
     public Sprite[] idleFrames;
@@ -19,10 +20,15 @@ public class FighterAnimator : MonoBehaviour
     public float runFrameRate = 12f;
     public float airFrameRate = 10f;
     public float attackFrameRate = 16f;
+    public float overheatFlashRate = 10f;
+    public float damageFlashRate = 18f;
+    public Color overheatFlashColor = new Color(1f, 0.62f, 0.12f, 1f);
+    public Color damageFlashColor = Color.white;
 
     private Sprite[] currentFrames;
     private int frameIndex;
     private float frameTimer;
+    private Color baseColor = Color.white;
 
     void Awake()
     {
@@ -34,6 +40,12 @@ public class FighterAnimator : MonoBehaviour
 
         if (combat == null)
             combat = GetComponent<PlayerCombat>();
+
+        if (health == null)
+            health = GetComponent<Health>();
+
+        baseColor = spriteRenderer.color;
+        spriteRenderer.color = baseColor;
     }
 
     void Update()
@@ -44,14 +56,15 @@ public class FighterAnimator : MonoBehaviour
         Sprite[] nextFrames = GetFramesForState();
         float frameRate = GetFrameRate(nextFrames);
         Play(nextFrames, frameRate);
+        ApplyColorState();
     }
 
     Sprite[] GetFramesForState()
     {
         Vector2 velocity = rb.linearVelocity;
 
-        if (combat != null && combat.IsHeavyAttacking && HasFrames(heavyAttackFrames))
-            return heavyAttackFrames;
+        if (combat != null && combat.IsOverheated && HasFrames(idleFrames))
+            return idleFrames;
 
         if (combat != null && combat.IsAttacking && HasFrames(attackFrames))
             return attackFrames;
@@ -109,4 +122,27 @@ public class FighterAnimator : MonoBehaviour
         frameIndex = (frameIndex + 1) % currentFrames.Length;
         spriteRenderer.sprite = currentFrames[frameIndex];
     }
+
+    void ApplyColorState()
+    {
+        if (health != null && health.IsDamageFlashing && IsFlashOn(damageFlashRate))
+        {
+            spriteRenderer.color = damageFlashColor;
+            return;
+        }
+
+        if (combat != null && combat.IsOverheated && IsFlashOn(overheatFlashRate))
+        {
+            spriteRenderer.color = overheatFlashColor;
+            return;
+        }
+
+        spriteRenderer.color = baseColor;
+    }
+
+    bool IsFlashOn(float flashRate)
+    {
+        return Mathf.FloorToInt(Time.time * flashRate) % 2 == 0;
+    }
+
 }
